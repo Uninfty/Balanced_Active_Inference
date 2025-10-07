@@ -129,7 +129,3 @@ If you use this code in your research, please cite:
   year={2025}
 }
 ```
-
-## Acknowledgments
-
-We thank the developers of the BalancedSampling R package and the XGBoost library for their excellent implementations.
