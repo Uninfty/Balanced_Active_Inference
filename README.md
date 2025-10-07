@@ -69,7 +69,7 @@ If you use this code, please cite:
   title={Balanced Active Inference},
   author={[Your Name]},
   booktitle={Advances in Neural Information Processing Systems},
-  year={2024}
+  year={2025}
 }
 ```
 
