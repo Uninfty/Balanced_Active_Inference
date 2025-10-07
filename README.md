@@ -1,71 +1,128 @@
-# Balanced_Active_Inference
+# Balanced Active Inference
+
+Code accompanying the paper _Balanced Active Inference_ accepted at NeurIPS 2025.
 
 ## Installation
 
-### Step 1: Install Python Dependencies
+### Prerequisites
 
 ```bash
-pip install -r requirements.txt
+# Python 3.8 or higher
+python --version
+
+# R (required for BalancedSampling package)
+R --version
 ```
 
-### Step 2: Install R Dependencies
+### Python Dependencies
 
-Open R or RStudio and run:
+```bash
+pip install numpy pandas scikit-learn xgboost scipy matplotlib seaborn joblib rpy2
+```
+
+### R Dependencies
 
 ```R
 install.packages("BalancedSampling")
 ```
 
-### Step 3: Verify Installation
+## Repository Structure
 
-```python
-python -c "from src import *; print('Installation successful!')"
+```
+balanced-active-inference/
+├── README.md
+├── requirements.txt
+├── src/
+│   ├── __init__.py
+│   ├── data_generation.py      # Synthetic data generation
+│   ├── models.py                # Predictive and uncertainty models
+│   ├── sampling_methods.py      # Sampling strategies
+│   ├── variance_estimators.py   # Variance estimation
+│   ├── experiment.py            # Experimental framework
+│   └── visualization.py         # Plotting utilities
+├── examples/
+│   └── demo.ipynb              # Complete demonstration
+└── results/                     # Output directory
 ```
 
-## An Example
+## Quick Start
 
 ```python
-import numpy as np
-from src.data_generation import generate_friedman_data, split_data
-from src.models import ActiveInferenceModels
-from src.experiment import run_simulation_experiment
-from src.visualization import plot_comparison_results
+from src.data_generation import generate_friedman_data
+from src.models import train_predictive_models
+from src.sampling_methods import balanced_active_sampling
+from src.variance_estimators import estimate_variance
 
-# Generate data
-X, y = generate_friedman_data(10000, 10, random_state=0)
-X_train, X_test, y_train, y_test = split_data(X, y, random_state=0)
+# Generate synthetic data
+X, y = generate_friedman_data(n_samples=10000, n_features=10)
 
-# Train models
-models = ActiveInferenceModels()
-models.fit(X_train, y_train)
-y_pred, uncertainty = models.predict(X_test)
-error_pred = models.error_model.predict(X_test)
+# Train predictive models
+predictions, uncertainty = train_predictive_models(X, y)
 
-# Run experiment
-results = run_simulation_experiment(
-    y_test, y_pred, uncertainty, error_pred,
-    budgets=np.arange(0.05, 0.3, 0.05),
-    n_trials=100  # Increase for final results
+# Perform balanced active sampling
+selected_indices, estimates = balanced_active_sampling(
+    predictions, uncertainty, budget=0.1
 )
 
-# Visualize
-plot_comparison_results(results, 'results/comparison.pdf')
+# Estimate population mean with confidence interval
+mean_estimate, conf_interval = estimate_variance(
+    y, predictions, selected_indices, confidence_level=0.95
+)
 ```
 
-## Interactive Tutorial
+## Dataset
 
-For a comprehensive walkthrough, open the Jupyter notebook:
+This implementation uses the **Friedman synthetic dataset** [1], a widely-used benchmark for nonlinear regression:
 
-```bash
-jupyter notebook examples/demo.ipynb
+```
+Y = 10 * sin(π * X₁ * X₂) + 20 * (X₃ - 0.5)² + 10 * X₄ + 5 * X₅ + ε
+```
+
+where X₁, ..., X₅ ~ Uniform(0, 1) and ε ~ N(0, 0.09).
+
+**Reference:**
+[1] Friedman, J. H. (1991). Multivariate adaptive regression splines. *The Annals of Statistics*, 19(1), 1-67.
+
+Additional features X₆, ..., X₁₀ are included as noise variables to test robustness.
+
+## Experiments
+
+Run the complete experimental pipeline:
+
+```python
+from src.experiment import run_simulation_experiment
+
+results = run_simulation_experiment(
+    n_trials=10000,
+    budgets=np.arange(0.03, 0.45, 0.01),
+    n_jobs=10
+)
+```
+
+This generates evaluation metrics across different sampling budgets:
+- Root Mean Squared Error (RMSE)
+- Confidence Interval Width
+- Coverage Rate
+
+## Visualization
+
+Generate publication-quality plots:
+
+```python
+from src.visualization import plot_comparison_results
+
+plot_comparison_results(
+    results,
+    output_path='results/comparison.pdf'
+)
 ```
 
 ## Citation
 
-If you use this code, please cite:
+If you use this code in your research, please cite:
 
 ```bibtex
-@inproceedings{balanced_active_inference2024,
+@inproceedings{balanced_active_inference2025,
   title={Balanced Active Inference},
   author={[Your Name]},
   booktitle={Advances in Neural Information Processing Systems},
@@ -73,6 +130,6 @@ If you use this code, please cite:
 }
 ```
 
----
+## Acknowledgments
 
-**Happy researching! 🚀**
+We thank the developers of the BalancedSampling R package and the XGBoost library for their excellent implementations.
